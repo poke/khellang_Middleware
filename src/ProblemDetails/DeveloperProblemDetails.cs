@@ -2,32 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.StackTrace.Sources;
 
 namespace Hellang.Middleware.ProblemDetails
 {
-    internal class DeveloperProblemDetails : StatusCodeProblemDetails
+    public static class DeveloperProblemDetails
     {
-        public DeveloperProblemDetails(ExceptionProblemDetails problem, IEnumerable<ExceptionDetails> details)
-            : base(problem.Status ?? StatusCodes.Status500InternalServerError)
-        {
-            Detail = problem.Detail ?? problem.Error.Message;
-            Title = problem.Title ?? TypeNameHelper.GetTypeDisplayName(problem.Error.GetType());
-            Instance = problem.Instance ?? GetHelpLink(problem.Error);
-
-            if (!string.IsNullOrEmpty(problem.Type))
-            {
-                Type = problem.Type;
-            }
-
-            Errors = GetErrors(details).ToList();
-        }
-
-        public IReadOnlyCollection<ErrorDetails> Errors { get; }
-
-        private static IEnumerable<ErrorDetails> GetErrors(IEnumerable<ExceptionDetails> details)
+        internal static IEnumerable<ErrorDetails> GetErrors(IEnumerable<ExceptionDetails> details)
         {
             foreach (var detail in details)
             {
@@ -35,7 +17,7 @@ namespace Hellang.Middleware.ProblemDetails
             }
         }
 
-        private static string GetHelpLink(Exception exception)
+        internal static string GetHelpLink(Exception exception)
         {
             var link = exception.HelpLink;
 
@@ -54,7 +36,7 @@ namespace Hellang.Middleware.ProblemDetails
         
         public class ErrorDetails
         {
-            public ErrorDetails(ExceptionDetails detail)
+            internal ErrorDetails(ExceptionDetails detail)
             {
                 Raw = detail.Error.ToString();
                 Message = detail.ErrorMessage ?? detail.Error.Message;
