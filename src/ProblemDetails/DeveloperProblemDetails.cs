@@ -5,27 +5,23 @@ using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.StackTrace.Sources;
+using MvcProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
 
 namespace Hellang.Middleware.ProblemDetails
 {
-    internal class DeveloperProblemDetails : StatusCodeProblemDetails
+    internal static class DeveloperProblemDetailsExtensions
     {
-        public DeveloperProblemDetails(ExceptionProblemDetails problem, IEnumerable<ExceptionDetails> details)
-            : base(problem.Status ?? StatusCodes.Status500InternalServerError)
+        public static MvcProblemDetails WithExceptionDetails(this ExceptionProblemDetails problem, IEnumerable<ExceptionDetails> details)
         {
-            Detail = problem.Detail ?? problem.Error.Message;
-            Title = problem.Title ?? TypeNameHelper.GetTypeDisplayName(problem.Error.GetType());
-            Instance = problem.Instance ?? GetHelpLink(problem.Error);
+            problem.Status = problem.Status ?? StatusCodes.Status500InternalServerError;
+            problem.Detail = problem.Detail ?? problem.Error.Message;
+            problem.Title = problem.Title ?? TypeNameHelper.GetTypeDisplayName(problem.Error.GetType());
+            problem.Instance = problem.Instance ?? GetHelpLink(problem.Error);
 
-            if (!string.IsNullOrEmpty(problem.Type))
-            {
-                Type = problem.Type;
-            }
+            problem.Extensions["errors"] = GetErrors(details).ToList();
 
-            Errors = GetErrors(details).ToList();
+            return problem;
         }
-
-        public IReadOnlyCollection<ErrorDetails> Errors { get; }
 
         private static IEnumerable<ErrorDetails> GetErrors(IEnumerable<ExceptionDetails> details)
         {

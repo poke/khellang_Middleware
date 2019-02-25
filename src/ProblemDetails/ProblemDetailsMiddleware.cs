@@ -118,7 +118,7 @@ namespace Hellang.Middleware.ProblemDetails
                     try
                     {
                         var details = DetailsProvider.GetDetails(ex.Error);
-                        return new DeveloperProblemDetails(ex, details);
+                        return ex.WithExceptionDetails(details);
                     }
                     catch (Exception e)
                     {
